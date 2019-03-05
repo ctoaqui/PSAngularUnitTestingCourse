@@ -1,4 +1,4 @@
-import { TestBed, ComponentFixture } from "@angular/core/testing";
+import { TestBed, ComponentFixture, fakeAsync, tick, flush, async } from "@angular/core/testing";
 import { HeroDetailComponent } from "./hero-detail.component";
 import { ActivatedRoute } from "@angular/router";
 import { HeroService } from "../hero.service";
@@ -35,4 +35,49 @@ describe('HeroDetailComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('h2').textContent).toContain('SUPERDUDE');
   });
+
+  it('should call updateHero when save is called / first way', (done) => {
+    mockHeroService.updateHero.and.returnValue(of({}));
+    fixture.detectChanges();
+
+    fixture.componentInstance.save();
+
+    setTimeout(() => {
+      expect(mockHeroService.updateHero).toHaveBeenCalled();
+      done();
+    }, 300);
+  });
+
+  it('should call updateHero when save is called / second way', fakeAsync(() => {
+    mockHeroService.updateHero.and.returnValue(of({}));
+    fixture.detectChanges();
+
+    fixture.componentInstance.save();
+    // tick(250);
+    flush();
+
+    expect(mockHeroService.updateHero).toHaveBeenCalled();
+  }));
+
+  it('should call updateHero when save is called / third way', async(() => {
+    mockHeroService.updateHero.and.returnValue(of({}));
+    fixture.detectChanges();
+
+    fixture.componentInstance.saveWithPromise();
+
+    // when all promises are resolved
+    fixture.whenStable().then(() => {
+      expect(mockHeroService.updateHero).toHaveBeenCalled();
+    });;
+  }));
+
+  it('should call updateHero when save is called / recommend way', fakeAsync(() => {
+    mockHeroService.updateHero.and.returnValue(of({}));
+    fixture.detectChanges();
+
+    fixture.componentInstance.saveWithPromise();
+    flush();
+
+    expect(mockHeroService.updateHero).toHaveBeenCalled();
+  }));
 });
